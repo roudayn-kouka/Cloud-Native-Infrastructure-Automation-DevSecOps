@@ -1,0 +1,57 @@
+{{- if .Values.monitoring.prometheusRule.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: expense-alerts
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "expense.labels" . | nindent 4 }}
+spec:
+  groups:
+    - name: expense.rules
+      rules:
+        - alert: ExpenseBackendDown
+          expr: absent(up{namespace="{{ .Release.Namespace }}", job="backend"} == 1)
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: No healthy expense backend target
+            description: Prometheus has not seen a healthy backend target for 5 minutes.
+        - alert: ExpenseHighErrorRate
+          expr: |
+            sum(rate(expense_http_requests_total{status=~"5.."}[5m]))
+              / sum(rate(expense_http_requests_total[5m])) > 0.05
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: More than 5% of requests are failing
+            description: 5xx ratio has been above 5% for 10 minutes.
+        - alert: ExpenseHighLatencyP95
+          expr: |
+            histogram_quantile(0.95,
+              sum by (le) (rate(expense_http_request_duration_seconds_bucket[5m]))) > 1
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: p95 latency is above 1 second
+            description: The 95th percentile request latency has exceeded 1s for 10 minutes.
+        - alert: ExpenseDatabaseUnreachable
+          expr: min(expense_db_up) == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: The backend cannot reach MySQL
+            description: expense_db_up has been 0 for 2 minutes. Check RDS, security groups and the backend-db secret.
+        - alert: ExpensePodRestarting
+          expr: increase(kube_pod_container_status_restarts_total{namespace="{{ .Release.Namespace }}"}[15m]) > 3
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: A pod restarted more than 3 times in 15 minutes
+            description: Pod {{ "{{ $labels.pod }}" }} is crash-looping.
+{{- end }}

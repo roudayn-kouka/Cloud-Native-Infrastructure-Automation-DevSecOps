@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: expense
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: expense
+  source:
+    repoURL: https://github.com/roudayn-kouka/Cloud-Native-DevOps-Project.git
+    targetRevision: main
+    path: helm/expense
+    helm:
+      valueFiles:
+        - ../../gitops/environments/dev/values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: expense
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: baseline
+        pod-security.kubernetes.io/warn: restricted
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m

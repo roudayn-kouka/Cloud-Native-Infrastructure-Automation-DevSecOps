@@ -1,0 +1,69 @@
+{{- $f := .Values.frontend }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "expense.labels" . | nindent 4 }}
+    {{- include "expense.selectorLabels" (dict "name" "frontend" "root" .) | nindent 4 }}
+    tier: web
+spec:
+  {{- if not $f.hpa.enabled }}
+  replicas: {{ $f.replicaCount }}
+  {{- end }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      {{- include "expense.selectorLabels" (dict "name" "frontend" "root" .) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "expense.selectorLabels" (dict "name" "frontend" "root" .) | nindent 8 }}
+        tier: web
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        {{- include "expense.podSecurityContext" . | nindent 8 }}
+        runAsUser: 101
+        runAsGroup: 101
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              {{- include "expense.selectorLabels" (dict "name" "frontend" "root" .) | nindent 14 }}
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: frontend
+          image: {{ include "expense.image" (dict "root" . "image" $f.image) | quote }}
+          imagePullPolicy: {{ $f.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ $f.port }}
+          env:
+            - name: BACKEND_URL
+              value: "http://backend.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.backend.port }}"
+          startupProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 3
+            failureThreshold: 20
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 15
+          readinessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 10
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "5"]
+          resources:
+            {{- toYaml $f.resources | nindent 12 }}
+          securityContext:
+            {{- include "expense.containerSecurityContext" . | nindent 12 }}

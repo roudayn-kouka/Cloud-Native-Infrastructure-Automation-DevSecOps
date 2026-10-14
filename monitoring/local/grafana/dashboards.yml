@@ -1,0 +1,7 @@
+apiVersion: 1
+providers:
+  - name: expense
+    folder: Expense Tracker
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards

@@ -1,0 +1,15 @@
+{{- if .Values.targetGroupBinding.enabled }}
+apiVersion: elbv2.k8s.aws/v1beta1
+kind: TargetGroupBinding
+metadata:
+  name: frontend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "expense.labels" . | nindent 4 }}
+spec:
+  serviceRef:
+    name: frontend
+    port: {{ .Values.frontend.port }}
+  targetGroupARN: {{ required "targetGroupBinding.targetGroupARN is required" .Values.targetGroupBinding.targetGroupARN | quote }}
+  targetType: ip
+{{- end }}

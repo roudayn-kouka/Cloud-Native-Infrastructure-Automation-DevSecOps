@@ -1,0 +1,76 @@
+# Default values for the expense chart.
+# Environment-specific overrides live in gitops/environments/<env>/values.yaml.
+
+global:
+  # ECR registry, e.g. 123456789012.dkr.ecr.us-east-1.amazonaws.com
+  imageRegistry: "REPLACE_WITH_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com"
+  # Image tag shared by backend and frontend. Updated automatically by Jenkins (GitOps promote).
+  imageTag: "0.0.0"
+
+config:
+  dbHost: "REPLACE_WITH_RDS_ENDPOINT"   # from `terraform output db_endpoint` (30-db)
+  dbPort: "3306"
+  dbName: transactions
+  logLevel: info
+
+# Kubernetes Secret holding DB_USER and DB_PWD (created by scripts/create-db-secret.sh).
+existingSecret:
+  name: backend-db
+
+backend:
+  replicaCount: 2           # ignored when hpa.enabled=true
+  image:
+    repository: expense-backend
+    pullPolicy: IfNotPresent
+  port: 8080
+  resources:
+    requests: { cpu: 100m, memory: 128Mi }
+    limits: { cpu: 500m, memory: 256Mi }
+  hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+  pdb:
+    enabled: true
+    minAvailable: 1
+
+frontend:
+  replicaCount: 2
+  image:
+    repository: expense-frontend
+    pullPolicy: IfNotPresent
+  port: 8080
+  resources:
+    requests: { cpu: 50m, memory: 64Mi }
+    limits: { cpu: 250m, memory: 128Mi }
+  hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+    targetCPUUtilizationPercentage: 70
+  pdb:
+    enabled: true
+    minAvailable: 1
+
+# Attach the frontend pods to the ALB target group created by Terraform (60-ingress-alb).
+# Requires the AWS Load Balancer Controller (installed by scripts/bootstrap-cluster.sh).
+targetGroupBinding:
+  enabled: false
+  targetGroupARN: ""
+
+# NetworkPolicies (enforced by the VPC CNI when network policy support is enabled).
+networkPolicy:
+  enabled: true
+  vpcCidr: 10.0.0.0/16          # ALB -> frontend traffic originates from the VPC
+  monitoringNamespace: monitoring
+
+# Observability objects (need the Prometheus Operator CRDs from kube-prometheus-stack).
+monitoring:
+  serviceMonitor:
+    enabled: false
+    interval: 30s
+  prometheusRule:
+    enabled: false
+  dashboard:
+    enabled: false

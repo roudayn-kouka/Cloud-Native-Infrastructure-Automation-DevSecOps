@@ -1,0 +1,21 @@
+# "App of apps": one Application that manages every other Application in gitops/argocd/apps.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: expense
+  source:
+    repoURL: https://github.com/roudayn-kouka/Cloud-Native-DevOps-Project.git
+    targetRevision: main
+    path: gitops/argocd/apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

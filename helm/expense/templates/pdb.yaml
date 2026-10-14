@@ -1,0 +1,18 @@
+{{- range $name := list "backend" "frontend" }}
+{{- $cfg := index $.Values $name }}
+{{- if $cfg.pdb.enabled }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "expense.labels" $ | nindent 4 }}
+spec:
+  minAvailable: {{ $cfg.pdb.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "expense.selectorLabels" (dict "name" $name "root" $) | nindent 6 }}
+{{- end }}
+{{- end }}

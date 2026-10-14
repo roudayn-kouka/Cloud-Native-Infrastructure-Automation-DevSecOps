@@ -1,0 +1,23 @@
+# Environment overrides for the "dev" cluster. ArgoCD renders helm/expense with this file.
+# Jenkins updates global.imageTag on every successful main-branch build (GitOps promotion).
+global:
+  imageRegistry: "REPLACE_WITH_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com"
+  imageTag: "0.0.0"
+
+config:
+  dbHost: "REPLACE_WITH_RDS_ENDPOINT"
+
+targetGroupBinding:
+  enabled: true
+  targetGroupARN: "REPLACE_WITH_FRONTEND_TARGET_GROUP_ARN"   # terraform output frontend_target_group_arn (60-ingress-alb)
+
+networkPolicy:
+  vpcCidr: 10.0.0.0/16
+
+monitoring:
+  serviceMonitor:
+    enabled: true
+  prometheusRule:
+    enabled: true
+  dashboard:
+    enabled: true

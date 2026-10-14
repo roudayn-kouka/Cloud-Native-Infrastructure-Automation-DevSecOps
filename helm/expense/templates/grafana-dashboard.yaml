@@ -1,0 +1,13 @@
+{{- if .Values.monitoring.dashboard.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: expense-grafana-dashboard
+  namespace: {{ .Release.Namespace }}
+  labels:
+    grafana_dashboard: "1"
+    {{- include "expense.labels" . | nindent 4 }}
+data:
+  expense.json: |-
+{{ .Files.Get "dashboards/expense.json" | indent 4 }}
+{{- end }}

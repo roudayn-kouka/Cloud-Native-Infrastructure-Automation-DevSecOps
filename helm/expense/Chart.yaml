@@ -1,0 +1,9 @@
+apiVersion: v2
+name: expense
+description: Expense Tracker (React front-end + Node.js API) for the Cloud-Native DevOps Project
+type: application
+version: 1.0.0
+appVersion: "2.0.0"
+maintainers:
+  - name: Roudayna Kouka
+    url: https://github.com/roudayn-kouka

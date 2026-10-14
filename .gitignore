@@ -1,0 +1,20 @@
+# Dependencies & build output
+node_modules/
+dist/
+coverage/
+*.log
+
+# Environment / secrets
+.env
+*.pem
+*.key
+terraform/backend.hcl
+**/terraform.tfvars
+**/*.auto.tfvars
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+tfplan

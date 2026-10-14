@@ -1,0 +1,32 @@
+{
+  "name": "expense-backend",
+  "version": "2.0.0",
+  "description": "Expense tracker REST API (Node.js/Express + MySQL) for the Cloud-Native DevOps Project",
+  "main": "src/server.js",
+  "private": true,
+  "author": "Roudayna Kouka",
+  "license": "MIT",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "jest --coverage"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "mysql2": "^3.11.5",
+    "prom-client": "^15.1.3"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": ["src/**/*.js", "!src/server.js"],
+    "coverageReporters": ["text", "lcov"]
+  }
+}

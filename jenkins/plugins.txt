@@ -1,0 +1,10 @@
+workflow-aggregator
+git
+github
+github-branch-source
+credentials-binding
+pipeline-utility-steps
+sonar
+timestamper
+ansicolor
+nexus-artifact-uploader

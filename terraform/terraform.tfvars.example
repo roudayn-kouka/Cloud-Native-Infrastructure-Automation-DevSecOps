@@ -1,0 +1,4 @@
+# Copy into the stacks that need it (50-acm and 60-ingress-alb) as terraform.tfvars,
+# or export TF_VAR_zone_name=example.com before running scripts/tf.sh.
+zone_name             = "example.com"      # a PUBLIC Route 53 hosted zone you own
+bastion_allowed_cidrs = []                 # 10-sg: e.g. ["203.0.113.10/32"]; empty = SSM Session Manager only

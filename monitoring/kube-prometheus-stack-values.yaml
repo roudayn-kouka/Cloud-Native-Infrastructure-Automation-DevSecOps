@@ -1,0 +1,71 @@
+# Values for the kube-prometheus-stack chart (Prometheus, Alertmanager, Grafana, exporters).
+# Deployed by ArgoCD: gitops/argocd/apps/monitoring.yaml
+fullnameOverride: kps
+
+prometheus:
+  prometheusSpec:
+    retention: 7d
+    # Discover ServiceMonitors / PrometheusRules / PodMonitors from every namespace,
+    # not only those labelled with the Helm release name.
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: gp3
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 20Gi
+    resources:
+      requests: { cpu: 200m, memory: 512Mi }
+      limits: { memory: 1Gi }
+
+alertmanager:
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: gp3
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 2Gi
+  # Route alerts to Slack/e-mail by adding a receiver here. Keep webhook URLs in a
+  # Kubernetes Secret (alertmanagerSpec.secrets) - never in this file.
+  config:
+    route:
+      receiver: "null"
+      group_by: ["alertname", "namespace"]
+      routes:
+        - receiver: "null"
+          matchers:
+            - alertname = "Watchdog"
+    receivers:
+      - name: "null"
+
+grafana:
+  # Admin password is read from a Secret created out-of-band (scripts/bootstrap-cluster.sh).
+  admin:
+    existingSecret: grafana-admin
+    userKey: admin-user
+    passwordKey: admin-password
+  defaultDashboardsTimezone: browser
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      searchNamespace: ALL
+  persistence:
+    enabled: true
+    storageClassName: gp3
+    size: 5Gi
+
+# Managed control-plane components are not scrapable on EKS.
+kubeEtcd:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeControllerManager:
+  enabled: false
