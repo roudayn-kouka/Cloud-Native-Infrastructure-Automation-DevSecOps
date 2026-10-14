@@ -10,7 +10,7 @@ COPY src ./src
 RUN npm run build
 
 # ---- Stage 2: serve with unprivileged nginx -----------------------------------------
-FROM nginxinc/nginx-unprivileged:1.27-alpine
+FROM nginxinc/nginx-unprivileged:1.29-alpine
 ENV BACKEND_URL=http://backend:8080
 COPY nginx/default.conf.template /etc/nginx/templates/default.conf.template
 COPY nginx/security-headers.conf /etc/nginx/snippets/security-headers.conf
