@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: azure/setup-helm@v4
+      - uses: azure/setup-helm@v5
       - name: Lint
         run: helm lint helm/expense -f gitops/environments/dev/values.yaml
       - name: Render (all optional components enabled)
