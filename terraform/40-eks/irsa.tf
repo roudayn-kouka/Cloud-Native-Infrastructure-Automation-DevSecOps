@@ -1,7 +1,7 @@
 # IAM role for the AWS Load Balancer Controller (replaces the manual eksctl steps of the original guide)
 module "lb_controller_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "~> 5.48"
+  version = "~> 6.8"
 
   role_name                              = "${local.cluster_name}-aws-load-balancer-controller"
   attach_load_balancer_controller_policy = true
@@ -17,7 +17,7 @@ module "lb_controller_irsa" {
 # IAM role + managed add-on for the EBS CSI driver (needed for Prometheus/Grafana/Alertmanager volumes)
 module "ebs_csi_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "~> 5.48"
+  version = "~> 6.8"
 
   role_name             = "${local.cluster_name}-ebs-csi"
   attach_ebs_csi_policy = true
