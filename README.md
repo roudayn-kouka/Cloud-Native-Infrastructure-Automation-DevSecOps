@@ -178,8 +178,3 @@ Check the [EKS version support calendar](https://docs.aws.amazon.com/eks/latest/
 * OpenTelemetry tracing and Loki for logs
 * Remote-state backed Terraform plans in CI (OIDC to AWS)
 
-## Acknowledgements & license
-
-This project started from the open-source *Cloud-Native DevOps Project* by [NotHarshhaa](https://github.com/NotHarshhaa) (MIT). It was substantially redesigned and extended by **Roudayna Kouka**: new React front-end, hardened and tested API, rewritten Terraform, Helm chart, GitOps with ArgoCD, observability stack, security scanning and documentation. See [`docs/IMPROVEMENTS.md`](docs/IMPROVEMENTS.md) for the full list of changes.
-
-Released under the [MIT License](LICENSE) (the original copyright notice is preserved as the license requires).
